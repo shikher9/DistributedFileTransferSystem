@@ -1,0 +1,28 @@
+option optimize_for = SPEED;
+option java_package = "routing";
+
+import "common.proto";
+import "filemessage.proto";
+
+
+message CommandMessage {
+   optional Header header = 1;
+
+    oneof payload {
+
+      //file upload chunk
+      Chunk chunk = 2;
+
+      //file download request	
+      FileRequest filerequest = 3;
+
+      //failure
+      Failure err = 4;
+
+      //a client (external) sanity check for testing (client can test whether server is up or not)
+      bool ping = 5;
+
+      // message - send message to server
+      string message = 6;
+    }
+}

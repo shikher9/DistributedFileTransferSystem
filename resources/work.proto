@@ -1,0 +1,140 @@
+
+option optimize_for = SPEED;
+option java_package = "pipe.work";
+
+import "common.proto";
+import "election.proto";
+import "filemessage.proto";
+
+
+message WorkState {
+   required int32 enqueued = 1;
+   required int32 processed = 2;
+}
+
+message Heartbeat {
+   required WorkState state = 1;
+}
+
+/**
+ * description of the work
+ */
+message Task {  
+    required int64 series_id = 1;
+    required int32 seq_id = 2;
+}
+
+
+
+
+message Operation {
+   optional string cmd = 1;
+   optional string fileName = 2;
+   optional int64  userId = 3;
+   optional string filePath = 4;
+   optional bytes chunkData = 5;
+}
+message LogList {
+   repeated LogEntry logEntry = 1;
+}
+
+message LogEntry {
+    oneof payload {
+        int32 term = 1;
+        Operation operation = 2;
+    }
+   optional int32 logIndex = 3;
+  
+}
+
+message RaftHeader {
+    optional int32 originatorNodeId = 1;
+    optional int64 time = 2;
+    optional int32 toNode = 3;
+     
+}
+
+message RaftMessagePayload {
+   optional int32 messageId = 1;
+   optional int32 term = 2;
+   optional int32 index =11; 
+   optional LogList logList = 3;
+
+   optional RaftAction action = 5;
+
+   optional int32 previousLogIndex = 6;
+   optional int32 previousTerm = 7;
+   
+   optional int32 leaderId = 8;
+
+   enum RaftAction {
+   	UNDEFINED = 1;
+	HEARTBEAT = 2;
+	REQUESTVOTE = 3;
+	LEADER = 4;
+	APPEND = 5;
+	COMMIT = 6;
+	WHOISTHELEADER = 7;
+	THELEADERIS = 8;
+	CASTVOTE = 9;
+
+   }
+}
+
+message AcknowledgementPayload {
+   optional ResponseAction action = 1;
+   optional string response = 2;
+   optional int32 term = 3;
+
+   enum ResponseAction {
+   	UNDEFINED = 1;
+	CASTVOTE = 2;
+	HEARBEAT = 3;
+	APPENDSTATUS = 4;
+	OTHER = 6;
+	LEADER = 5;
+	ACK_APPEND =7;
+   }
+}
+
+message RaftMessage {
+	optional RaftHeader raftHeader = 1;
+	optional RaftMessagePayload raftMessagePayload = 2;
+	optional AcknowledgementPayload ackPayload = 3;
+}
+
+// These are messages to keep the network running (not to perform work)
+message WorkMessage {
+   required Header header = 1;
+   required int64 secret = 2;
+
+   /**
+    * The actions (request or response) is
+    * implicit through which data structure is in the payload.
+    */ 
+
+   // oneof means only one of the below will be there in the payload
+   oneof payload {
+      Failure err = 3;
+      
+      // a sanity check for testing
+      bool ping = 4;
+
+      // status updates between adjacent workers
+      Heartbeat beat = 5;
+
+      Task task = 6;
+      WorkState state = 7;
+      LeaderStatus leader = 8;
+      //file upload chunk
+      Chunk chunk = 9;
+      //file download request	
+      FileRequest filerequest = 10;
+      
+      RaftMessage raftMessage = 11;
+      
+      LogList logList = 12;
+      
+   }
+   
+}

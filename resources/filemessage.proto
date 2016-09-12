@@ -1,0 +1,33 @@
+option optimize_for = SPEED;
+option java_package = "file";
+
+import "common.proto";
+
+
+//chunk size decided to be 1024 bytes
+message ChunkHeader {
+    //userid shall be a combination of clusterid and nodeid.
+    //Examples:
+    //For cluster 1: clusterid+nodeid=11,12,13. clusterid=1,nodeid=1,2,3,...n
+    //For cluster 2: clusterid+nodeid=21,22,23. clusterid=2,nodeid=1,2,3,...n
+    required int64 userID = 1;
+    required string fileName = 2;
+	required int64 chunkID = 3;
+	optional int64 fileSize = 4;
+	//If maxhops is not -1, forward the incoming other cluster's request to some other cluster if your cluster is also busy.
+	optional int32 maxhops=5;
+	optional Failure err =6;
+
+}
+
+//For upload/save file
+message Chunk {
+	required ChunkHeader chunkHeader = 1;
+	optional bytes chunkData = 2; // data of chunk
+}
+
+//For file download/retrieve request
+message FileRequest {
+	required int64 userID = 1;
+	required string fileName = 2;
+}

@@ -1,0 +1,31 @@
+//optimizing messages for speed
+option optimize_for = SPEED;
+
+//specifies package for classes corresponding to the file.
+option java_package = "pipe.common";
+
+/**
+ * the accompanying information for all messages. Provides origination,
+ * security, authentication, and tracking information
+ */
+
+//header message which contains meta info about the message. A header will be part of very message whether it is command message or work message
+message Header {  
+    required int32 node_id = 1; //id for source node
+    required int64 time = 2; // timestamp in milliseconds when message was sent for node
+   
+    // if the message is for a specific node, this will be set
+    optional int32 destination = 8; // destination node
+
+    // This factor limits the distance that a msg travels from the originating 
+    // node. Default (-1) is the whole network (not restricted).
+    optional int32 max_hops = 10 [default = -1];
+}
+
+// Failure - message is sent when exception happens on while reading incoming message from a server, so a failure 
+// message is returned to node from which message came.
+message Failure {
+    required int32 id = 1; // node id on which exception happened while 
+    optional int32 ref_id = 2; // node id from which message came and exception happeded while reading 
+    optional string message = 3; // this will be the exception stacktrace (see code in (Work Handler) Class (handleMessage) method)
+}
