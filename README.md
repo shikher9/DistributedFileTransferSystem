@@ -5,4 +5,4 @@ A distributed file transfer system using netty. This project just provides a bas
 
 # Technology and Algorithms
 
-The project uses netty for file transfer , Raft for distributing the state machine and synchronization among machines in a cluster , and CouchDB and H2 Database Engine for storing data. All the source is in Java, both the client and the server and uses Ant build system.
+The project uses netty for file transfer, protocol buffer for message format, Raft for distributing the state machine and synchronization among machines in a cluster , and CouchDB and H2 Database Engine for storing data. All the source is in Java, both the client and the server and uses Ant build system.
